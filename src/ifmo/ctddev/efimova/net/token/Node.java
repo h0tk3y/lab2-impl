@@ -69,6 +69,15 @@ public class Node {
 
         new Thread(this::receiveReconfigure).start();
         new Thread(this::receiveToken).start();
+        new Thread(() -> {
+            try {
+                Thread.sleep(Constants.TICK * 10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("R!! Planned reconfiguration");
+            initReconfigure(version + 1);
+        }).start();
         initReconfigure(version + 1);
     }
 
@@ -238,9 +247,9 @@ public class Node {
         //noinspection InfiniteLoopStatement
         while (true) {
             try (ServerSocket serverTCPSocket = new ServerSocket(Constants.TCP_PORT)) {
-                serverTCPSocket.setSoTimeout(Constants.TICK * 1000);
+                serverTCPSocket.setSoTimeout(Constants.TICK * 2000);
                 try (Socket prevSocket = serverTCPSocket.accept()) {
-                    prevSocket.setSoTimeout(Constants.TICK * 1000);
+                    prevSocket.setSoTimeout(Constants.TICK * 2000);
                     DataInputStream is = new DataInputStream(prevSocket.getInputStream());
                     Token token = new Token(is);
 
